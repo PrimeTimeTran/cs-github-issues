@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 
 import { BrowserRouter as Router, Route } from "react-router-dom";
-
+import "@trendmicro/react-sidenav/dist/react-sidenav.css";
 import "./App.css";
 
 import Navbar from "./components/Navbar";
@@ -24,7 +24,7 @@ function App() {
   };
 
   const onShowGists = () => {
-    console.log('onShowGists')
+    console.log("onShowGists");
     setRenderRepos(false);
     setRenderGists(true);
   };
@@ -35,7 +35,7 @@ function App() {
   };
 
   const onSelectRepo = async name => {
-    console.log('ednjeqwdejw')
+    console.log("ednjeqwdejw");
     const response = await fetch(
       `https://api.github.com/repos/primetimetran/${name}/commits`
     );
@@ -53,6 +53,19 @@ function App() {
     );
     const jsonData = await response.json();
     setSearchedRepos(jsonData.items);
+  };
+
+  const getCurrentUserGists = async token => {
+    const options = {
+      method: "GET",
+      headers: {
+        Authorization: `token ${token}`.split("&")[0]
+      },
+      json: true
+    };
+    const response = await fetch("https://api.github.com/gists", options);
+    const gists = await response.json();
+    setGists(gists);
   };
 
   const setupCurrentUser = () => {
@@ -84,7 +97,6 @@ function App() {
   };
 
   const getCurrentUser = async token => {
-    console.log("token", token);
     const options = {
       json: true,
       method: "GET",
@@ -98,6 +110,7 @@ function App() {
     if (currentUser) {
       setCurrentUser(currentUser);
       getCurrentUserRepos(token);
+      getCurrentUserGists(token);
     }
   };
 
@@ -149,8 +162,6 @@ function App() {
     }
     return <Route path="/" exact component={AuthenticationScreen} />;
   };
-
-  console.log('gists', gists)
 
   return (
     <>
