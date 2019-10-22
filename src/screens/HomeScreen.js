@@ -1,21 +1,17 @@
-import React, { PureComponent, Component } from 'react';
+import React, { Component } from 'react';
 
 import {
   Row,
-  Accordion,
   Card,
   ListGroup,
   Button,
 } from 'react-bootstrap'
 
 import moment from 'moment'
-import PropTypes from "prop-types";
+import EmbeddedGist from './EmbeddedGist.js'
 
 import SideNav, { NavItem, NavIcon, NavText } from '@trendmicro/react-sidenav';
 import '@trendmicro/react-sidenav/dist/react-sidenav.css';
-
-import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
-import { docco } from "react-syntax-highlighter/dist/styles/prism";
 
 
 import { 
@@ -31,46 +27,18 @@ import {
   FaExclamationCircle,
 } from 'react-icons/fa';
 
-console.log('SyntaxHighlighter.supportedLanguages', SyntaxHighlighter.supportedLanguages)
-
-const children = `
-  import React, { Component } from 'react';
-  import SyntaxHighlighter, { registerLanguage } from 'react-syntax-highlighter/dist/light';
-  import codestyle from 'react-syntax-highlighter/dist/styles/dark';
-  import js from 'react-syntax-highlighter/dist/languages/javascript';
-
-  function getAnimal() {
-    const animal = 'cat';
-    return animal.toUpperCase();
-  }
-
-  const ourAnimal = getAnimal();
-  console.log(ourAnimal);
-`;
-
-class CodeBlock extends PureComponent {
-  static propTypes = {
-    value: PropTypes.string.isRequired,
-    language: PropTypes.string
-  };
-
-  static defaultProps = {
-    language: null
-  };
-
-  render() {
-    const { language, value } = this.props;
-    return (
-      <SyntaxHighlighter language={language} style={docco}>
-        {value}
-      </SyntaxHighlighter>
-    );
-  }
-}
-
 export default class HomeScreen extends Component {
+  componentDidMount() {
+    let go = []
+    if (this.props.gists.length > 0) {
+      this.props.gists(gist => {
+        console.log('componentDidMount')
+        go.push(gist.content)
+      })
+      console.log('g', go)
+    }
+  }
   onSidebarClick = selected => {
-    console.log('selected', selected)
     if (selected.substring(0,4) === 'repo') {
       this.props.onSelectRepo(selected.substring(4, selected.length))
     }
@@ -79,6 +47,9 @@ export default class HomeScreen extends Component {
     }
     if (selected === 'gists') {
       this.props.onShowGists()
+    }
+    if (selected === 'home') {
+      this.props.onShowHome()
     }
   }
 
@@ -146,50 +117,19 @@ export default class HomeScreen extends Component {
     return Object.keys(gist.files)[0]
   }
 
-  getGistContent = async(id) => {
-    const options = {
-      json: true,
-      method: 'GET',
-      headers: { "Authorization": `token ${this.props.token}`.split('&')[0] }
-    }
-    const response = await fetch(`https://api.github.com/gists/${id}`, options)
-    const gistData = await response.json()
-    if (gistData.message !== 'Not Found') {
-      let gist = await gistData.files[this.getFirstFile(gistData)]
-      if (gist.language === 'JavaScript') {
-        console.log('gist.content', typeof gist.content)
-        console.log('gist.content type', gist.content)
-        const content = gist.content.toString()
-        return content
-      }
-      return "console.log('go')"
-    }
-    return "console.log('go')"
-  }
-
   renderGists() {
-    return this.props.gists.map((gist) => {
-      return (
-        <Card style={{ width: '60vw', margin: 15, padding: 35 }}>
-          <Card.Body>
-            <Card.Title 
-              style={{ color: '#007bff', fontSize: 30 }}
-            >
-              {this.getFirstFile(gist)}
-            </Card.Title>
-            <Card.Text>
-            {/* <SyntaxHighlighter language="jsx" style={coy}>{children}</SyntaxHighlighter> */}
-            <CodeBlock 
-             language="jsx"
-             value={children}
-            />
-            </Card.Text>
-            <Card.Link href={gist.html_url}><FaGithub style={{ marginRight: 5 }} />GitHub</Card.Link>
-            <Card.Link href={gist.html_url}><FaBook style={{ marginRight: 5 }} />{moment(gist.created_at).fromNow()}</Card.Link>
-          </Card.Body>
-        </Card>
-      )
-    })
+    return this.props.gists.map(gist => {
+			return (
+				<div style={{ width: '80%' }}>
+					<h4>{gist.owner.login}/{Object.keys(gist.files)[0]}</h4>
+					<EmbeddedGist
+						gist={gist.owner.login + "/" + gist.id}
+						file={Object.keys(gist.files)[0]}
+					/>
+					<hr />
+				</div>
+			)
+		})
   }
 
   render() {

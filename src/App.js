@@ -1,206 +1,165 @@
-import React from 'react';
-import {
-  Form,
-  Button,
-  Navbar,
-  InputGroup,
-  FormControl,
-} from 'react-bootstrap'
+import React, { useEffect, useState } from "react";
 
 import { BrowserRouter as Router, Route } from "react-router-dom";
 
-import './App.css';
+import "./App.css";
 
-import AuthenticationScreen from './screens/AuthenticationScreen'
-import HomeScreen from './screens/HomeScreen'
+import Navbar from "./components/Navbar";
+import HomeScreen from "./screens/HomeScreen";
+import AuthenticationScreen from "./screens/AuthenticationScreen";
 
-class App extends React.Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-      token: null,
-      currentUser: {},
-      renderRepos: true,
-      _searchedRepos: [],
-      get searchedRepos() {
-        return this._searchedRepos;
-      },
-      set searchedRepos(value) {
-        this._searchedRepos = value;
-      },
-      currentUserRepos: [],
-      repoSearchTerm: 'react'
-    }
-  }
+function App() {
+  const [gists, setGists] = useState([]);
+  const [token, setToken] = useState(null);
+  const [currentUser, setCurrentUser] = useState({});
+  const [renderRepos, setRenderRepos] = useState(true);
+  const [renderGists, setRenderGists] = useState(false);
+  const [searchedRepos, setSearchedRepos] = useState([]);
+  const [repoSearchTerm, setRepoSearchTerm] = useState("react");
+  const [currentUserRepos, setCurrentUserRepos] = useState([]);
 
-  async componentDidMount() {
-    this.setupCurrentUser()
-    const response = await fetch(`https://api.github.com/search/repositories?q=${this.state.repoSearchTerm}`)
-    const jsonData = await response.json()
-    console.log('jsonData', jsonData)
+  const onLogOut = () => {
+    sessionStorage.removeItem("token");
+    setCurrentUser(null);
+  };
 
-    this.setState({ searchedRepos: jsonData.items })
-  }
+  const onShowGists = () => {
+    setRenderRepos(false);
+    setRenderGists(true);
+  };
 
-  setupCurrentUser() {
-    const existingToken = sessionStorage.getItem('token');
-    const accessToken = (window.location.search.split("=")[0] === "?access_token") ? window.location.search.split("=")[1] : null;
+  const onShowHome = () => {
+    setRenderRepos(true);
+    setRenderGists(false);
+  };
+
+  const onSelectRepo = async name => {
+    const response = await fetch(
+      `https://api.github.com/repos/primetimetran/${name}/commits`
+    );
+    const repoInfo = await response.json();
+  };
+
+  const onSearching = e => {
+    setRepoSearchTerm(e.target.value);
+  };
+
+  const onRepoSearch = async e => {
+    e.preventDefault();
+    const response = await fetch(
+      `https://api.github.com/search/repositories?q=${repoSearchTerm}`
+    );
+    const jsonData = await response.json();
+    setSearchedRepos(jsonData.items);
+  };
+
+  const setupCurrentUser = () => {
+    const existingToken = sessionStorage.getItem("token");
+    const accessToken =
+      window.location.search.split("=")[0] === "?access_token"
+        ? window.location.search.split("=")[1]
+        : null;
     const clientId = process.env.REACT_APP_CLIENT_ID;
 
     if (!accessToken && !existingToken) {
-      window.location.replace(`https://github.com/login/oauth/authorize?scope=user:email,repo&client_id=${clientId}`)
+      window.location.replace(
+        `https://github.com/login/oauth/authorize?scope=user:email,repo&client_id=${clientId}`
+      );
     }
 
     if (accessToken) {
       sessionStorage.setItem("token", accessToken);
-      this.storeUserLocal(accessToken)
+      storeUserLocal(accessToken);
     }
 
     if (existingToken) {
-      this.storeUserLocal(existingToken)
+      storeUserLocal(existingToken);
     }
-  }
+  };
 
-  storeUserLocal(token) {
-    this.setState({ token }, this.getCurrentUser)
-  }
+  const storeUserLocal = token => {
+    setToken(token);
+    getCurrentUser();
+  };
 
-  async getCurrentUser() {
+  const getCurrentUser = async () => {
+    console.log("token", token);
     const options = {
       json: true,
-      method: 'GET',
+      method: "GET",
       headers: {
-        "Authorization": `token ${this.state.token}`.split('&')[0],
-      },
-    }
-    const response = await fetch('https://api.github.com/user', options)
-    const currentUser = await response.json()
+        Authorization: `token ${token}`.split("&")[0]
+      }
+    };
+    const response = await fetch("https://api.github.com/user", options);
+    const currentUser = await response.json();
 
     if (currentUser) {
-      this.setState({ currentUser }, this.getCurrentUserRepos)
+      setCurrentUser(currentUser);
+      getCurrentUserRepos();
     }
-  }
+  };
 
-  getCurrentUserRepos = async() => {
+  const getCurrentUserRepos = async () => {
     const options = {
-      method: 'GET',
+      method: "GET",
       headers: {
-        "Authorization": `token ${this.state.token}`.split('&')[0],
+        Authorization: `token ${token}`.split("&")[0]
       },
-      json: true,
-    }
-    const response = await fetch('https://api.github.com/user/repos', options)
-    const currentUserRepos = await response.json()
+      json: true
+    };
+    const response = await fetch("https://api.github.com/user/repos", options);
+    const currentUserRepos = await response.json();
+    console.log("currentUserRepos", currentUserRepos);
+  };
 
-    this.setState({ currentUserRepos }, this.getFavoriteRepos)
-  }
+  useEffect(() => {
+    setupCurrentUser();
+    const go = async () => {
+      const response = await fetch(
+        `https://api.github.com/search/repositories?q=${repoSearchTerm}`
+      );
+      const jsonData = await response.json();
+      setSearchedRepos(jsonData.items);
+    };
+    go();
+  }, []);
 
-  getFavoriteRepos() {
-    const favoriteRepos = sessionStorage.getItem('favoriteRepos');
-    console.log('favoriteRepos', favoriteRepos)
-
-    this.getCurrentUserGists()
-  }
-
-  async getCurrentUserGists() {
-    const options = {
-      method: 'GET',
-      headers: {
-        "Authorization": `token ${this.state.token}`.split('&')[0],
-      },
-      json: true,
-    }
-    const response = await fetch('https://api.github.com/gists', options)
-    const gists = await response.json()
-    this.setState({ 
-      gists
-    })
-  }
-
-  async onSelectRepo(name) {
-    console.log('onSelectRepo')
-    const response = await fetch(`https://api.github.com/repos/primetimetran/${name}/commits`)
-    const repoInfo = await response.json()
-  }
-
-  onLogOut = () => {
-    sessionStorage.removeItem("token");
-    this.setState({ currentUser: null })
-  }
-
-  onRepoSearch = async(e) => {
-    console.log('onRepoSearch')
-    e.preventDefault()
-    const response = await fetch(`https://api.github.com/search/repositories?q=${this.state.repoSearchTerm}`)
-    const jsonData = await response.json()
-
-    this.setState({ searchedRepos: jsonData.items })
-  }
-
-  onShowGists = () => {
-    this.setState({ 
-      renderGists: true,
-      renderRepos: false,
-    })
-  }
-
-  onSearching = e => {
-    this.setState({ repoSearchTerm: e.target.value })
-  }
-
-  renderNavBar() {
-    return (
-      <Navbar className="justify-content-between" style={{ backgroundColor: '#080705', paddingLeft: 55 }}>
-        <Form inline>
-          <InputGroup>
-            <InputGroup.Prepend>
-              <InputGroup.Text id="basic-addon1">@</InputGroup.Text>
-            </InputGroup.Prepend>
-            <FormControl
-              aria-label="Username"
-              aria-describedby="basic-addon1"
-              placeholder={this.state.currentUser && this.state.currentUser.login || 'Username'}
-            />
-          </InputGroup>
-        </Form>
-        <Form inline onSubmit={(e) => this.onRepoSearch(e)}>
-          <FormControl type="text" placeholder="Search" onChange={this.onSearching} className=" mr-sm-2" />
-          <Button type="submit">Submit</Button>
-        </Form>
-      </Navbar>
-    )
-  }
-
-  renderAuthenticatedRoute() {
-    if (this.state.currentUser !== null) {
+  const renderAuthenticatedRoute = () => {
+    if (currentUser !== null) {
       return (
         <Route
           path="/"
           render={routeProps => (
             <HomeScreen
               {...routeProps}
-              {...this.state}
-              onLogOut={this.onLogOut}
-              onShowGists={this.onShowGists}
-              onSelectRepo={name => this.onSelectRepo(name)}
+              gists={gists}
+              onLogOut={onLogOut}
+              searchedRepos={searchedRepos}
+              onShowHome={onShowHome}
+              renderRepos={renderRepos}
+              renderGists={renderGists}
+              onShowGists={onShowGists}
+              currentUserRepos={currentUserRepos}
+              onSelectRepo={name => onSelectRepo(name)}
             />
           )}
         />
-      )
+      );
     }
-    return <Route path="/" exact component={AuthenticationScreen} />
-  }
+    return <Route path="/" exact component={AuthenticationScreen} />;
+  };
 
-  render() {
-    return (
-      <div>
-        {this.renderNavBar()}
-        <Router>
-          {this.renderAuthenticatedRoute()}
-        </Router>
-      </div>
-    );
-  }
+  return (
+    <>
+      <Navbar
+        onSearching={onSearching}
+        onRepoSearch={onRepoSearch}
+        currentUser={currentUser}
+      />
+      <Router>{renderAuthenticatedRoute()}</Router>
+    </>
+  );
 }
 
 export default App;
