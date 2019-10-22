@@ -196,7 +196,9 @@ export default class HomeScreen extends Component {
                 <NavText>Hittiti</NavText>
               </NavItem>
             </NavItem>
-            <NavItem eventKey="Log Out" navitemStyle={{ alignSelf: 'flex-end' }}>
+            <NavItem
+              eventKey="Log Out"
+            >
               <NavIcon>
                 <FaSignOutAlt />
               </NavIcon>
@@ -208,8 +210,7 @@ export default class HomeScreen extends Component {
           style={{
             marginLeft: 300,
             overflowY: "scroll",
-            height: "100vh",
-            backgroundColor: "red"
+            height: "100vh"
           }}
         >
           <div className="container">
