@@ -6,17 +6,18 @@ const clientId = process.env.REACT_APP_CLIENT_ID;
 const secretKey = process.env.REACT_APP_SECRET_KEY;
 
 http.createServer((req, res) => {
+  console.log('test', req, res)
   var code = req.url.split("=")[1];
   if (code) {
     request.post('https://github.com/login/oauth/access_token', {
       form: {
+        code: code,
         client_id: clientId,
         client_secret: secretKey,
-        code: code
       }
     }, (err, r, body) => {
       res.writeHead(301, {
-        'Location': 'http://localhost:3000?' + body
+        'Location': 'https://cs-github.netlify.com/?' + body
       });
       res.end();
     })
