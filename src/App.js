@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 
 import { BrowserRouter as Router, Route } from "react-router-dom";
+import 'bootstrap/dist/css/bootstrap.min.css';
 import "@trendmicro/react-sidenav/dist/react-sidenav.css";
 import "./App.css";
 
@@ -11,7 +12,7 @@ import AuthenticationScreen from "./screens/AuthenticationScreen";
 function App() {
   const [gists, setGists] = useState([]);
   const [token, setToken] = useState(null);
-  const [currentUser, setCurrentUser] = useState({});
+  const [currentUser, setCurrentUser] = useState  ({});
   const [renderRepos, setRenderRepos] = useState(true);
   const [renderGists, setRenderGists] = useState(false);
   const [searchedRepos, setSearchedRepos] = useState([]);

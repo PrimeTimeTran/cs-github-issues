@@ -25,7 +25,6 @@ export default class HomeScreen extends Component {
     let go = [];
     if (this.props.gists.length > 0) {
       this.props.gists(gist => {
-        console.log("componentDidMount");
         go.push(gist.content);
       });
       console.log("g", go);
@@ -61,7 +60,7 @@ export default class HomeScreen extends Component {
       this.props.renderRepos &&
       this.props.searchedRepos.map((repo, idx) => {
         return (
-          <Card key={idx} style={{ width: "60vw", margin: 15, padding: 35 }}>
+          <Card key={idx} style={{ margin: 15, padding: 35 }}>
             <div
               style={{
                 display: "flex",
@@ -196,9 +195,7 @@ export default class HomeScreen extends Component {
                 <NavText>Hittiti</NavText>
               </NavItem>
             </NavItem>
-            <NavItem
-              eventKey="Log Out"
-            >
+            <NavItem eventKey="Log Out">
               <NavIcon>
                 <FaSignOutAlt />
               </NavIcon>
@@ -208,9 +205,8 @@ export default class HomeScreen extends Component {
         </SideNav>
         <Row
           style={{
-            marginLeft: 300,
+            height: "100vh",
             overflowY: "scroll",
-            height: "100vh"
           }}
         >
           <div className="container">

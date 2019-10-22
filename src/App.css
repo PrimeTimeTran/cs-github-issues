@@ -1,9 +1,19 @@
+* {
+  margin: 0px;
+  padding: 0px;
+}
 body {
-  max-height: 100vh;
-  overflow: hidden;
+
+  overflow: hidden; 
 }
 
 .sidenav---sidenav---_2tBP {
-  top: 54px;  
+  top: 54px;
   background-color: #40434e;
+}
+
+@media (pointer: none), (pointer: coarse) {
+  nav.nav-style {
+    display: none;
+  }
 }
