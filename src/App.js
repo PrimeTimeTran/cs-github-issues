@@ -24,6 +24,7 @@ function App() {
   };
 
   const onShowGists = () => {
+    console.log('onShowGists')
     setRenderRepos(false);
     setRenderGists(true);
   };
@@ -34,6 +35,7 @@ function App() {
   };
 
   const onSelectRepo = async name => {
+    console.log('ednjeqwdejw')
     const response = await fetch(
       `https://api.github.com/repos/primetimetran/${name}/commits`
     );
@@ -60,7 +62,6 @@ function App() {
         ? window.location.search.split("=")[1]
         : null;
     const clientId = process.env.REACT_APP_CLIENT_ID;
-
     if (!accessToken && !existingToken) {
       window.location.replace(
         `https://github.com/login/oauth/authorize?scope=user:email,repo&client_id=${clientId}`
@@ -79,10 +80,10 @@ function App() {
 
   const storeUserLocal = token => {
     setToken(token);
-    getCurrentUser();
+    getCurrentUser(token);
   };
 
-  const getCurrentUser = async () => {
+  const getCurrentUser = async token => {
     console.log("token", token);
     const options = {
       json: true,
@@ -96,11 +97,11 @@ function App() {
 
     if (currentUser) {
       setCurrentUser(currentUser);
-      getCurrentUserRepos();
+      getCurrentUserRepos(token);
     }
   };
 
-  const getCurrentUserRepos = async () => {
+  const getCurrentUserRepos = async token => {
     const options = {
       method: "GET",
       headers: {
@@ -110,7 +111,6 @@ function App() {
     };
     const response = await fetch("https://api.github.com/user/repos", options);
     const currentUserRepos = await response.json();
-    console.log("currentUserRepos", currentUserRepos);
   };
 
   useEffect(() => {
@@ -135,11 +135,11 @@ function App() {
               {...routeProps}
               gists={gists}
               onLogOut={onLogOut}
-              searchedRepos={searchedRepos}
               onShowHome={onShowHome}
               renderRepos={renderRepos}
               renderGists={renderGists}
               onShowGists={onShowGists}
+              searchedRepos={searchedRepos}
               currentUserRepos={currentUserRepos}
               onSelectRepo={name => onSelectRepo(name)}
             />
@@ -149,6 +149,8 @@ function App() {
     }
     return <Route path="/" exact component={AuthenticationScreen} />;
   };
+
+  console.log('gists', gists)
 
   return (
     <>

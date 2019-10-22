@@ -13,7 +13,6 @@ import EmbeddedGist from './EmbeddedGist.js'
 import SideNav, { NavItem, NavIcon, NavText } from '@trendmicro/react-sidenav';
 import '@trendmicro/react-sidenav/dist/react-sidenav.css';
 
-
 import { 
   FaStar,
   FaBook,
@@ -66,9 +65,9 @@ export default class HomeScreen extends Component {
   }
 
   renderSearchedRepos() {
-    return this.props.renderRepos && this.props.searchedRepos.map(repo => {
+    return this.props.renderRepos && this.props.searchedRepos.map((repo, idx) => {
       return (
-        <Card style={{ width: '60vw', margin: 15, padding: 35 }}>
+        <Card key={idx} style={{ width: '60vw', margin: 15, padding: 35 }}>
           <div style={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-between'}}>
             <Card.Img variant="top" src={repo.owner.avatar_url} style={{ width: '20%', height: '30%' }} />
             <div style={{ display: 'flex', flexDirection: 'column' }}>
