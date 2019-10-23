@@ -36,7 +36,6 @@ function App() {
   };
 
   const onSelectRepo = async name => {
-    console.log("ednjeqwdejw");
     const response = await fetch(
       `https://api.github.com/repos/primetimetran/${name}/commits`
     );
