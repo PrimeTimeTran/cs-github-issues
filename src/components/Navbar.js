@@ -3,7 +3,6 @@ import {
   Form,
   Button,
   Navbar,
-  InputGroup,
   FormControl,
   Nav,
   NavDropdown
@@ -12,7 +11,7 @@ import {
 export default function Navbarr(props) {
   return (
     <Navbar bg="light" expand="lg">
-      <Navbar.Brand href="#home">React-Bootstrap</Navbar.Brand>
+      <Navbar.Brand href="#home">Github</Navbar.Brand>
       <Navbar.Toggle aria-controls="basic-navbar-nav" />
       <Navbar.Collapse id="basic-navbar-nav">
         <Nav className="mr-auto">
@@ -37,9 +36,11 @@ export default function Navbarr(props) {
             className="mr-sm-2"
             onChange={props.onSearching}
           />
-          <Button onClick={e => props.onRepoSearch(e)} variant="primary">Search</Button>
+          <Button onClick={e => props.onRepoSearch(e)} variant="primary">
+            Search
+          </Button>
         </Form>
       </Navbar.Collapse>
-    </Navbar>
+    </Navbar>   
   );
 }

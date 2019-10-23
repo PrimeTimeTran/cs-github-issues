@@ -54,6 +54,8 @@ function App() {
     );
     const jsonData = await response.json();
     setSearchedRepos(jsonData.items);
+    setRenderRepos(true);
+    setRenderGists(false);
   };
 
   const getCurrentUserGists = async token => {
